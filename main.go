@@ -374,6 +374,19 @@ func main() {
 
 		// Проверка на некорректный или бессмысленный вопрос
 		if isInvalidQuestion(userText) {
+			// Создание объекта для сохранения некорректного запроса
+			invalidQA := QA{
+				ID:       -1,
+				Question: userText,
+				Answer:   "Вопрос некорректный. Пожалуйста, уточните свой вопрос.",
+				Images:   []string{},
+				Date:     time.Now().Format(time.RFC3339),
+			}
+
+			if err := saveQA(qaFilePath, invalidQA); err != nil {
+				log.Printf("Ошибка сохранения некорректного вопроса и ответа: %v", err)
+			}
+
 			c.JSON(http.StatusOK, gin.H{
 				"answer": "Вопрос некорректный. Пожалуйста, уточните свой вопрос.",
 				"images": []string{},
@@ -384,7 +397,19 @@ func main() {
 		contextText, imagePaths, found := FindRelevantContext(userText, elements)
 
 		if !found {
-			// Если контекст не найден, отвечаем, что информации нет
+			// Создание объекта для сохранения запроса без найденного контекста
+			notFoundQA := QA{
+				ID:       -1,
+				Question: userText,
+				Answer:   "Такой информации нет, вы можете обратиться к разработчику.",
+				Images:   []string{},
+				Date:     time.Now().Format(time.RFC3339),
+			}
+
+			if err := saveQA(qaFilePath, notFoundQA); err != nil {
+				log.Printf("Ошибка сохранения запроса без контекста: %v", err)
+			}
+
 			c.JSON(http.StatusOK, gin.H{
 				"answer": "Такой информации нет, вы можете обратиться к разработчику.",
 				"images": []string{},
@@ -416,7 +441,7 @@ func main() {
 		}
 		log.Printf("Generated image URLs: %v", imageURLs)
 
-		// Сохранение вопроса и ответа в JSON
+		// Сохранение корректного вопроса и ответа в JSON
 		qa := QA{
 			ID:       len(imageURLs), // Просто пример ID
 			Question: userText,
@@ -505,23 +530,6 @@ func saveQA(filePath string, qa QA) error {
 
 	return os.WriteFile(filePath, data, 0644)
 }
-
-// func getQAs(filePath string) ([]QA, error) {
-// 	var qas []QA
-
-// 	// Чтение файла
-// 	data, err := ioutil.ReadFile(filePath)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	// Десериализация JSON
-// 	if err := json.Unmarshal(data, &qas); err != nil {
-// 		return nil, err
-// 	}
-
-// 	return qas, nil
-// }
 
 // очистка файла QA
 func ClearJSONFile(filepath string) error {
