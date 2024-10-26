@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -333,11 +334,13 @@ func main() {
 	}
 
 	router := gin.Default()
-
 	router.Use(CORSMiddleware())
 
 	// Обслуживание статических файлов (изображений)
 	router.Static("/images", "./images")
+
+	// Создаем файл для хранения вопросов и ответов
+	qaFilePath := "qa_data.json"
 
 	router.POST("/ask", func(c *gin.Context) {
 		var request struct {
@@ -395,6 +398,19 @@ func main() {
 		}
 		log.Printf("Generated image URLs: %v", imageURLs)
 
+		// Сохранение вопроса и ответа в JSON
+		qa := QA{
+			ID:       len(imageURLs), // Просто пример ID
+			Question: userText,
+			Answer:   response,
+			Images:   imageURLs,
+			Date:     time.Now().Format(time.RFC3339),
+		}
+
+		if err := saveQA(qaFilePath, qa); err != nil {
+			log.Printf("Ошибка сохранения вопроса и ответа: %v", err)
+		}
+
 		c.JSON(http.StatusOK, gin.H{
 			"answer": response,
 			"images": imageURLs,
@@ -418,4 +434,54 @@ func isInvalidQuestion(question string) bool {
 	}
 
 	return false
+}
+
+// хранения истории в json
+type QA struct {
+	ID       int      `json:"id"`
+	Question string   `json:"question"`
+	Answer   string   `json:"answer"`
+	Images   []string `json:"images"` // Список ссылок на изображения
+	Date     string   `json:"date"`   // Можно использовать time.Time, но проще хранить как строку
+}
+
+func saveQA(filePath string, qa QA) error {
+	var qas []QA
+
+	// Чтение существующего файла
+	if _, err := os.Stat(filePath); err == nil {
+		data, err := ioutil.ReadFile(filePath)
+		if err != nil {
+			return err
+		}
+		json.Unmarshal(data, &qas)
+	}
+
+	// Добавление нового вопроса и ответа
+	qas = append(qas, qa)
+
+	// Сохранение в файл
+	data, err := json.MarshalIndent(qas, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	return ioutil.WriteFile(filePath, data, 0644)
+}
+
+func getQAs(filePath string) ([]QA, error) {
+	var qas []QA
+
+	// Чтение файла
+	data, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		return nil, err
+	}
+
+	// Десериализация JSON
+	if err := json.Unmarshal(data, &qas); err != nil {
+		return nil, err
+	}
+
+	return qas, nil
 }
