@@ -1,5 +1,3 @@
-// main.go
-
 package main
 
 import (
@@ -380,14 +378,20 @@ func main() {
 		}
 
 		// Генерация URL для изображений
-		imageURLs := make([]string, len(imagePaths))
-
-		for i, path := range imagePaths {
+		imageSet := make(map[string]struct{})
+		for _, path := range imagePaths {
 			scheme := "http"
 			if c.Request.TLS != nil {
 				scheme = "https"
 			}
-			imageURLs[i] = fmt.Sprintf("%s://%s/images/%s", scheme, c.Request.Host, filepath.Base(path))
+			imageURL := fmt.Sprintf("%s://%s/images/%s", scheme, c.Request.Host, filepath.Base(path))
+			imageSet[imageURL] = struct{}{}
+		}
+
+		// Преобразуем карту обратно в массив
+		imageURLs := make([]string, 0, len(imageSet))
+		for url := range imageSet {
+			imageURLs = append(imageURLs, url)
 		}
 		log.Printf("Generated image URLs: %v", imageURLs)
 
