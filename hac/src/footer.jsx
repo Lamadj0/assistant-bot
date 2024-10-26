@@ -13,3 +13,48 @@ export default function Footer(){
         </div>
     );
 }
+
+
+// function App() {
+//   const [question, setQuestion] = useState('');
+//   const [answer, setAnswer] = useState('');
+//   const [images, setImages] = useState([]);
+
+//   const handleSubmit = async (e) => {
+//     e.preventDefault();
+//     try {
+//       const response = await fetch('http://localhost:8080/ask', {
+//         method: 'POST',
+//         headers: {
+//           'Content-Type': 'application/json',
+//         },
+//         body: JSON.stringify({ question }),
+//       });
+//       const data = await response.json();
+//       setAnswer(data.answer);
+//       setImages(data.images);
+//     } catch (error) {
+//       console.error('Ошибка при запросе:', error);
+//     }
+//   };
+
+//   return (
+//     <div>
+//       <form onSubmit={handleSubmit}>
+//         <input
+//           type="text"
+//           value={question}
+//           onChange={(e) => setQuestion(e.target.value)}
+//           placeholder="Введите вопрос"
+//         />
+//         <button type="submit">Спросить</button>
+//       </form>
+//       {answer && <p>Ответ: {answer}</p>}
+//       {images.map((src, index) => (
+//         <img key={index} src={src} alt={`Изображение ${index + 1}`} />
+//       ))}
+//     </div>
+//   );
+// }
+
+// export default App;
