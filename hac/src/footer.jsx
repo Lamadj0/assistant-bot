@@ -43,6 +43,12 @@ export default function Footer() {
     }
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      handleSubmit(e);
+    }
+  };
+
   const handleImageClick = async (e) => {
     if (e.target.requestFullscreen) {
       await e.target.requestFullscreen();
@@ -81,6 +87,7 @@ export default function Footer() {
               type="text"
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
+              onKeyDown={handleKeyDown}
               placeholder="Введите сообщение"
             />
             <div type="submit" className="send" onClick={handleSubmit}>
@@ -97,8 +104,6 @@ export default function Footer() {
           </form>
         </div>
       </div>
-
-      
     </>
   );
 }
