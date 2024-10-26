@@ -5,6 +5,9 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"image"
+	_ "image/jpeg"
+	_ "image/png"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -176,9 +179,24 @@ func ParseDocument(filePath string) ([]DocumentElement, error) {
 
 // Функция для сохранения медиафайла и возврата пути к нему
 func SaveMediaFile(name string, data []byte) string {
+	// Декодируем изображение, чтобы получить его размеры
+	img, _, err := image.Decode(bytes.NewReader(data))
+	if err != nil {
+		log.Printf("Не удалось декодировать изображение %s: %v", name, err)
+		return ""
+	}
+	bounds := img.Bounds()
+	width := bounds.Dx()
+	height := bounds.Dy()
+	// log.Printf("Размер изображения %v and %v", width, height)
+	if width < 60 && height < 60 {
+		log.Printf("Изображение %s слишком маленькое (%dx%d), пропускаем", name, width, height)
+		return ""
+	}
+
 	fileName := filepath.Base(name)
 	filePath := filepath.Join("images", fileName)
-	err := ioutil.WriteFile(filePath, data, 0644)
+	err = os.WriteFile(filePath, data, 0644)
 	if err != nil {
 		log.Printf("Ошибка сохранения медиафайла %s: %v", name, err)
 		return ""
@@ -417,6 +435,8 @@ func main() {
 		})
 	})
 
+	router.POST("/deleteqa", ClearJSONFileHandler)
+
 	router.Run(":8080")
 }
 
@@ -466,22 +486,57 @@ func saveQA(filePath string, qa QA) error {
 		return err
 	}
 
-	return ioutil.WriteFile(filePath, data, 0644)
+	return os.WriteFile(filePath, data, 0644)
 }
 
-func getQAs(filePath string) ([]QA, error) {
-	var qas []QA
+// func getQAs(filePath string) ([]QA, error) {
+// 	var qas []QA
 
-	// Чтение файла
-	data, err := ioutil.ReadFile(filePath)
+// 	// Чтение файла
+// 	data, err := ioutil.ReadFile(filePath)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	// Десериализация JSON
+// 	if err := json.Unmarshal(data, &qas); err != nil {
+// 		return nil, err
+// 	}
+
+// 	return qas, nil
+// }
+
+// очистка файла QA
+func ClearJSONFile(filepath string) error {
+	emptyJSON := make(map[string]interface{})
+	file, err := os.Create(filepath) // Открываем файл на запись, перезаписывая его содержимое
 	if err != nil {
-		return nil, err
+		return err
+	}
+	defer file.Close()
+
+	// Записываем пустой JSON-объект в файл
+	encoder := json.NewEncoder(file)
+	encoder.SetIndent("", "  ") // Опционально: форматируем с отступами
+	if err := encoder.Encode(emptyJSON); err != nil {
+		return err
 	}
 
-	// Десериализация JSON
-	if err := json.Unmarshal(data, &qas); err != nil {
-		return nil, err
+	return nil
+}
+
+func ClearJSONFileHandler(c *gin.Context) {
+	filePath := "./qa_data.json"
+
+	// Вызываем функцию очистки
+	if err := ClearJSONFile(filePath); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Ошибка при очистке JSON-файла",
+		})
+		return
 	}
 
-	return qas, nil
+	c.JSON(http.StatusOK, gin.H{
+		"message": "JSON-файл успешно очищен",
+	})
 }
