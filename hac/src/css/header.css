@@ -1,0 +1,85 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+  }
+  
+  html{
+    font-family: "Inter", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: weight;
+    font-style: normal;
+    background: #121212;
+  }
+  
+  .header{
+    display: flex;
+    justify-content: space-between;
+    color: aliceblue;
+    position: absolute;
+    margin-left: 50%;
+    transform: translateX(-50%);
+    min-width: 600px;
+    border-bottom: 1px solid #000000;
+    margin-top: 50px;
+    align-items: flex-end; 
+  }
+  .logo{
+    margin-bottom: 10px;
+    display: flex;
+  }
+  .logo img{
+    max-width: 35px;
+    border-radius: 50%;
+    margin-right: 10px;
+  }
+  .main-header{
+    position: relative;
+  }
+  .name{
+    margin-top: 10px;
+    font-size: 16px;
+  }
+
+  .dots {
+    position: relative;
+    display: inline-block;
+    width: 20px; 
+    height: 25px; 
+    margin-bottom: 10px;
+}
+
+.dots::before,
+.dots::after {
+    content: '';
+    position: absolute;
+    width: 5px; /* Ширина точки */
+    height: 5px; /* Высота точки */
+    background-color: #285083;
+    border-radius: 50%; /* Круглая форма */
+}
+
+.dots::before {
+    left: 50%;
+    top: 0;
+    transform: translate(-50%, 0); /* Центрируем по горизонтали */
+}
+
+.dots::after {
+    left: 50%;
+    bottom: 0;
+    transform: translate(-50%, 0); /* Центрируем по горизонтали */
+}
+
+.dots span {
+    display: inline-block;
+    width: 5px; /* Ширина средней точки */
+    height: 5px; /* Высота средней точки */
+    background-color: #285083; /* Цвет средней точки */
+    border-radius: 50%; /* Круглая форма */
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%); /* Центрируем по вертикали и горизонтали */
+}
