@@ -46,33 +46,41 @@ form {
 }
 
 .scrollable-container {
-    max-height: 600px;  
+    max-height: 600px;
     overflow-y: auto;
     margin-bottom: 20px;
     padding-right: 10px;
 }
 
 .qa-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
     margin-bottom: 20px;
 }
 
+/* Вопросы пользователя (справа) */
 .question {
     color: #f2f2f2;
-    margin-bottom: 10px;
     background-color: #363636;
     border-radius: 15px;
     max-width: 300px;
     padding: 10px;
-    float: right;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    text-align: right;
+    align-self: flex-end;
 }
 
+/* Ответы (слева) */
 .answer {
     background-color: #373840;
     color: #f2f2f2;
     border-radius: 15px;
     max-width: 300px;
     padding: 10px;
-    top: 10%;
+    text-align: left;
+    align-self: flex-start;
 }
 
 .answer-img img {
@@ -80,4 +88,55 @@ form {
     margin-top: 10px;
     margin-bottom: 10px;
     border-radius: 5px;
+    cursor: pointer;
+    margin-right: 330px; 
+}
+
+/* Сообщение об ошибке */
+.error-message {
+    color: #ff4d4d;
+    background-color: #2c2c2c;
+    border-radius: 10px;
+    max-width: 300px;
+    padding: 10px;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+/* Модальное окно для полноэкранного изображения */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-image {
+    max-width: 90%;
+    max-height: 90%;
+    border-radius: 10px;
+}
+
+.close-fullscreen {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: #ffffff;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    z-index: 1001;
+}
+
+.close-fullscreen:hover {
+    background-color: rgba(255, 0, 0, 0.8);
 }
