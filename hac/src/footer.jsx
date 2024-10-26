@@ -5,11 +5,18 @@ export default function Footer() {
   const [question, setQuestion] = useState('');
   const [images, setImages] = useState([]);
   const [answers, setAnswers] = useState([]);
-  const [showAnswer, setShowAnswer] = useState(false);
+  const [error, setError] = useState('');
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!question.trim()) {
+      setError('Пожалуйста, введите сообщение');
+      return;
+    }
+
+    setError('');
     const newEntry = { question, answer: '', images: [] };
     setAnswers([...answers, newEntry]);
 
@@ -28,12 +35,25 @@ export default function Footer() {
       setAnswers((prevAnswers) => prevAnswers.map((entry, index) =>
         index === prevAnswers.length - 1 ? updatedEntry : entry
       ));
-
-      setShowAnswer(true);
     } catch (error) {
-      console.error('Ошибка при запросе:', error);
+      console.error('Error:', error);
+      setError('Не удалось отправить запрос');
     } finally {
       setQuestion('');
+    }
+  };
+
+  const handleImageClick = async (e) => {
+    if (e.target.requestFullscreen) {
+      await e.target.requestFullscreen();
+      setIsFullscreen(true);
+    }
+  };
+
+  const closeFullscreen = () => {
+    if (document.exitFullscreen) {
+      document.exitFullscreen();
+      setIsFullscreen(false);
     }
   };
 
@@ -41,13 +61,14 @@ export default function Footer() {
     <>
       <div className="main-footer">
         <div className="scrollable-container">
+          {error && <p className="error-message">{error}</p>}
           {answers.map((item, index) => (
             <div key={index} className="qa-item">
-              <p className="question">Вопрос: {item.question}</p>
-              {item.answer && <p className="answer">Ответ: {item.answer}</p>}
+              <p className="question">{item.question}</p>
+              {item.answer && <p className="answer">{item.answer}</p>}
               {item.images && item.images.map((src, i) => (
                 <div className="answer-img" key={i}>
-                  <img src={src} alt={`Изображение ${i + 1}`} />
+                  <img src={src} alt={`Изображение ${i + 1}`} onClick={handleImageClick} />
                 </div>
               ))}
             </div>
@@ -76,6 +97,8 @@ export default function Footer() {
           </form>
         </div>
       </div>
+
+      
     </>
   );
 }
