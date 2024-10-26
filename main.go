@@ -435,6 +435,23 @@ func main() {
 		})
 	})
 
+	router.GET("/history", func(c *gin.Context) {
+		var qas []QA
+
+		data, err := ioutil.ReadFile(qaFilePath)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка при чтении файла истории"})
+			return
+		}
+
+		if err := json.Unmarshal(data, &qas); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка при разборе JSON"})
+			return
+		}
+
+		c.JSON(http.StatusOK, qas)
+	})
+
 	router.POST("/deleteqa", ClearJSONFileHandler)
 
 	router.Run(":8080")

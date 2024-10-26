@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import './css/footer.css';
 
 export default function Footer() {
@@ -7,6 +7,26 @@ export default function Footer() {
   const [answers, setAnswers] = useState([]);
   const [error, setError] = useState('');
   const [isFullscreen, setIsFullscreen] = useState(false);
+
+  const messageRef = useRef(null)
+  
+  useEffect(() => {
+    const fetchHistory = async () => {
+      try {
+        const res = await fetch('http://localhost:8080/history')
+        const data = await res.json()
+        setAnswers(data)
+      } catch (err) {
+        console.log('Ошибка при загрузке истории:', err)
+      }
+    }
+
+    fetchHistory()
+  }, [])
+
+  useEffect(() => {
+    messageRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [answers])
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -79,6 +99,7 @@ export default function Footer() {
               ))}
             </div>
           ))}
+          <div ref={messageRef} />
         </div>
 
         <div className="footer">
