@@ -348,6 +348,7 @@ func main() {
 
 		// Генерация URL для изображений
 		imageURLs := make([]string, len(imagePaths))
+
 		for i, path := range imagePaths {
 			scheme := "http"
 			if c.Request.TLS != nil {
@@ -355,6 +356,7 @@ func main() {
 			}
 			imageURLs[i] = fmt.Sprintf("%s://%s/images/%s", scheme, c.Request.Host, filepath.Base(path))
 		}
+		log.Printf("Generated image URLs: %v", imageURLs)
 
 		c.JSON(http.StatusOK, gin.H{
 			"answer": response,
