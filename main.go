@@ -187,15 +187,18 @@ func SaveMediaFile(name string, data []byte) string {
 	return filePath
 }
 
-func FindRelevantContext(question string, elements []DocumentElement) (string, []string) {
+// Измененная функция, возвращающая флаг наличия контекста
+func FindRelevantContext(question string, elements []DocumentElement) (string, []string, bool) {
 	keywords := FindKeywords(question)
 	var contextText strings.Builder
 	var imagePaths []string
+	found := false
 
 	for i, element := range elements {
 		if element.Type == "text" {
 			for _, keyword := range keywords {
 				if strings.Contains(strings.ToLower(element.Content), keyword) {
+					found = true
 					// Добавляем текст в контекст
 					contextText.WriteString(element.Content)
 					contextText.WriteString("\n")
@@ -213,11 +216,7 @@ func FindRelevantContext(question string, elements []DocumentElement) (string, [
 		}
 	}
 
-	if contextText.Len() == 0 {
-		return "Контекст не найден.", nil
-	}
-
-	return contextText.String(), imagePaths
+	return contextText.String(), imagePaths, found
 }
 
 func FindKeywords(text string) []string {
@@ -254,7 +253,7 @@ func GenerateCompletion(userText, context, iamToken string) (string, error) {
 			MaxTokens:   2000,
 		},
 		Messages: []Message{
-			{Role: "system", Text: "Ты — умный ассистент, помогающий пользователям работать с приложением. Обрати внимание, что в документации могут быть изображения, связанные с текстом."},
+			{Role: "system", Text: "Ты — умный ассистент, помогающий пользователям работать с приложением. Отвечай только на вопросы, связанные с документацией. Если вопрос не относится к документации, ответь: \"Такой информации нет, вы можете обратиться к разработчику.\""},
 			{Role: "user", Text: fmt.Sprintf("Документация:\n%s", context)},
 			{Role: "user", Text: fmt.Sprintf("Вопрос пользователя: %s", userText)},
 		},
@@ -313,9 +312,6 @@ func main() {
 		log.Fatal("API_KEY не установлен")
 	}
 
-	// Остальной код программы...
-	log.Println("Токен:", iamToken)
-
 	// Парсинг документации
 	elements, err := ParseDocument("./train_data_Sila/data.docx")
 	if err != nil {
@@ -338,7 +334,26 @@ func main() {
 		}
 
 		userText := request.Question
-		contextText, imagePaths := FindRelevantContext(userText, elements)
+
+		// Проверка на некорректный или бессмысленный вопрос
+		if isInvalidQuestion(userText) {
+			c.JSON(http.StatusOK, gin.H{
+				"answer": "Вопрос некорректный. Пожалуйста, уточните свой вопрос.",
+				"images": []string{},
+			})
+			return
+		}
+
+		contextText, imagePaths, found := FindRelevantContext(userText, elements)
+
+		if !found {
+			// Если контекст не найден, отвечаем, что информации нет
+			c.JSON(http.StatusOK, gin.H{
+				"answer": "Такой информации нет, вы можете обратиться к разработчику.",
+				"images": []string{},
+			})
+			return
+		}
 
 		response, err := GenerateCompletion(userText, contextText, iamToken)
 		if err != nil {
@@ -365,4 +380,20 @@ func main() {
 	})
 
 	router.Run(":8080")
+}
+
+// Функция для проверки корректности вопроса
+func isInvalidQuestion(question string) bool {
+	trimmed := strings.TrimSpace(question)
+	if len(trimmed) < 5 {
+		return true
+	}
+
+	// Проверка на наличие недопустимых символов
+	invalidChars := regexp.MustCompile(`[^\w\s\p{L}\p{N}\p{P}]`)
+	if invalidChars.MatchString(trimmed) {
+		return true
+	}
+
+	return false
 }
