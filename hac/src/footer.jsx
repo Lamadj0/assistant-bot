@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import './css/footer.css';
+import { Send, X } from 'lucide-react'
 
 export default function Footer() {
   const [question, setQuestion] = useState('');
@@ -7,6 +8,8 @@ export default function Footer() {
   const [answers, setAnswers] = useState([]);
   const [error, setError] = useState('');
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [modalImageSrc, setModalImageSrc] = useState('')
 
   const messageRef = useRef(null)
   
@@ -36,9 +39,12 @@ export default function Footer() {
       return;
     }
 
-    setError('');
-    const newEntry = { question, answer: '', images: [] };
-    setAnswers([...answers, newEntry]);
+    setError('')
+    const newEntry = { question, answer: '', images: [] }
+    setAnswers(prevAnswers => [
+      ...(Array.isArray(prevAnswers) ? prevAnswers : []),
+      newEntry,
+    ])
 
     try {
       const response = await fetch('http://localhost:8080/ask', {
@@ -69,62 +75,88 @@ export default function Footer() {
     }
   };
 
-  const handleImageClick = async (e) => {
-    if (e.target.requestFullscreen) {
-      await e.target.requestFullscreen();
-      setIsFullscreen(true);
-    }
+  const handleImageClick = (src) => {
+    setModalImageSrc(src)
+    setIsModalOpen(true)
   };
 
-  const closeFullscreen = () => {
-    if (document.exitFullscreen) {
-      document.exitFullscreen();
-      setIsFullscreen(false);
+  const closeModal = () => {
+		setModalImageSrc('')
+		setIsModalOpen(false)
+	}
+
+  // const closeFullscreen = () => {
+  //   if (document.exitFullscreen) {
+  //     document.exitFullscreen();
+  //     setIsFullscreen(false);
+  //   }
+  // };
+
+  const clearHistory = async () => {
+    if (window.confirm('Вы уверены, что хотите очистить историю?')) {
+      setAnswers([])
+      try {
+        await fetch('http://localhost:8080/deleteqa', { method: 'POST' })
+      } catch (error) {
+        console.error('Ошибка при очистке истории на сервере:', error)
+      }
     }
-  };
+  }
 
   return (
-    <>
-      <div className="main-footer">
-        <div className="scrollable-container">
-          {error && <p className="error-message">{error}</p>}
-          {answers.map((item, index) => (
-            <div key={index} className="qa-item">
-              <p className="question">{item.question}</p>
-              {item.answer && <p className="answer">{item.answer}</p>}
-              {item.images && item.images.map((src, i) => (
-                <div className="answer-img" key={i}>
-                  <img src={src} alt={`Изображение ${i + 1}`} onClick={handleImageClick} />
-                </div>
-              ))}
-            </div>
-          ))}
-          <div ref={messageRef} />
-        </div>
+		<>
+			<div className='main-footer'>
+				<div className='scrollable-container'>
+					{error && <p className='error-message'>{error}</p>}
+					{Array.isArray(answers) &&
+						answers.map((item, index) => (
+							<div key={index} className='qa-item'>
+								<p className='question'>{item.question}</p>
+								{item.answer && <p className='answer'>{item.answer}</p>}
+								{item.images &&
+									item.images.map((src, i) => (
+										<div className='answer-img' key={i}>
+											<img
+												src={src}
+												alt={`Изображение ${i + 1}`}
+												onClick={() => handleImageClick(src)}
+											/>
+										</div>
+									))}
+							</div>
+						))}
+					<div ref={messageRef} />
+				</div>
 
-        <div className="footer">
-          <form>
-            <input
-              type="text"
-              value={question}
-              onChange={(e) => setQuestion(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Введите сообщение"
-            />
-            <div type="submit" className="send" onClick={handleSubmit}>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                height="26px"
-                viewBox="0 -960 960 960"
-                width="30px"
-                fill="#f2f2f2"
-              >
-                <path d="M440-160v-487L216-423l-56-57 320-320 320 320-56 57-224-224v487h-80Z" />
-              </svg>
-            </div>
-          </form>
-        </div>
-      </div>
-    </>
-  );
+				<div className='footer'>
+					<form>
+						<input
+							type='text'
+							value={question}
+							onChange={e => setQuestion(e.target.value)}
+							onKeyDown={handleKeyDown}
+							placeholder='Введите сообщение'
+						/>
+						<div type='submit' className='send' onClick={handleSubmit}>
+							<Send size={22} />
+						</div>
+					</form>
+					<button className='clear-history' onClick={clearHistory}>
+						Очистить историю
+					</button>
+				</div>
+			</div>
+
+			{isModalOpen && (
+				<div className='modal-overlay' onClick={closeModal}>
+					<div className='modal-content' onClick={e => e.stopPropagation()}>
+						<img src={modalImageSrc} alt='Просмотр изображения' />
+						<button className='close-button' onClick={closeModal}>
+							<X />
+						</button>
+					</div>
+				</div>
+			)}
+		</>
+	)
 }
