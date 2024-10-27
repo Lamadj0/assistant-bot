@@ -52,10 +52,11 @@ form {
 }
 
 .scrollable-container {
-    max-height: 60vh;
+    max-height: 80vh;
     overflow-y: auto;
     margin-bottom: 20px;
     padding-right: 10px;
+    margin-top: 200px;
 }
 
 .qa-item {
@@ -159,6 +160,7 @@ form {
     font-size: 16px;
     transition: all 0.4s;
     margin-top: 50px;
+    margin-left: -130px;
 }
 
 .clear-history:hover {
