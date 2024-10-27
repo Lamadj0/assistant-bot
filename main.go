@@ -565,3 +565,5 @@ func ClearJSONFileHandler(c *gin.Context) {
 		"message": "JSON-файл успешно очищен",
 	})
 }
+
+//чек

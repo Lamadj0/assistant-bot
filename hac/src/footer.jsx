@@ -90,7 +90,7 @@ export default function Footer() {
   //     document.exitFullscreen();
   //     setIsFullscreen(false);
   //   }
-  // };
+  // }; чек
 
   const clearHistory = async () => {
     if (window.confirm('Вы уверены, что хотите очистить историю?')) {
