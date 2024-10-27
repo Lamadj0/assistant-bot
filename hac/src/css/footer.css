@@ -52,7 +52,7 @@ form {
 }
 
 .scrollable-container {
-    max-height: 600px;
+    max-height: 60vh;
     overflow-y: auto;
     margin-bottom: 20px;
     padding-right: 10px;
