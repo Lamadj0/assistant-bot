@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import './css/footer.css';
+import './css/header.css'
+import logo from './img/Grey.png'
 import { Send, X } from 'lucide-react'
 
 export default function Footer() {
@@ -11,6 +13,10 @@ export default function Footer() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalImageSrc, setModalImageSrc] = useState('')
 
+  const [dots, setDots] = useState(false);
+  const modalDots = () => {
+    setDots(!dots)
+  }
   const messageRef = useRef(null)
   
   useEffect(() => {
@@ -105,6 +111,20 @@ export default function Footer() {
 
   return (
 		<>
+    <div className="main-header">
+            <div className="header">
+                <div className="logo">
+                    <img src={logo} alt="" />
+                    <div className="name">Бот-Ассистент</div>
+                </div>
+                <div class="dots" onClick={modalDots}>
+                        {dots && (<button className='clear-history' onClick={clearHistory}>
+                      Очистить историю
+                    </button>)}
+                          
+                </div>
+            </div>
+        </div>
 			<div className='main-footer'>
 				<div className='scrollable-container'>
 					{error && <p className='error-message'>{error}</p>}
@@ -141,9 +161,7 @@ export default function Footer() {
 							<Send size={22} />
 						</div>
 					</form>
-					<button className='clear-history' onClick={clearHistory}>
-						Очистить историю
-					</button>
+					
 				</div>
 			</div>
 
