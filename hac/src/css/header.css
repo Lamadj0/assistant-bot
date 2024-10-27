@@ -24,6 +24,9 @@
     border-bottom: 1px solid #000000;
     margin-top: 50px;
     align-items: flex-end; 
+    background-color: #121212;
+    z-index: 1000000000;
+    
   }
   .logo{
     margin-bottom: 10px;
