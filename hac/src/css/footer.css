@@ -52,11 +52,10 @@ form {
 }
 
 .scrollable-container {
-    max-height: 80vh;
+    max-height: 78vh;
     overflow-y: auto;
     margin-bottom: 20px;
     padding-right: 10px;
-    margin-top: 200px;
 }
 
 .qa-item {
