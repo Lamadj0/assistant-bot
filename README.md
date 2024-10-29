@@ -41,7 +41,7 @@ assistant-bot/
 ### 1. Клонирование репозитория
 
 ```bash
-git clone https://github.com/your-repository/assistant-bot.git
+git clone https://github.com/Lamadj0/assistant_bot.git
 cd assistant-bot
 ```
 ### 2. Установка зависимостей Go
@@ -57,7 +57,7 @@ API_KEY=ваш_ключ_YandexGPT
 ```
 ### 4. Запуск бэкенда на Go
 ```bash
-go run cmd/main.go
+go run main.go
 ```
 Сервер Go будет запущен на порту 8080. Вы можете взаимодействовать с API через следующие эндпоинты:
 
